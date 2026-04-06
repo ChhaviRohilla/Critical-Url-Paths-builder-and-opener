@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Pentest URL Opener",
+  "version": "2.0",
+  "description": "Generate recon URLs from dirs.txt and open them all in tabs",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pentest-url-opener@pentest.local",
+      "strict_min_version": "91.0"
+    }
+  },
+  "permissions": ["tabs"],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Pentest URL Opener"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  }
+}

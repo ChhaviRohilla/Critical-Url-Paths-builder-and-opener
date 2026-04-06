@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      width: 380px;
+      background: #0f1117;
+      color: #e2e8f0;
+      padding: 16px;
+    }
+    .header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .dot { width: 8px; height: 8px; background: #7dd3fc; border-radius: 50%; flex-shrink: 0; }
+    h1 { font-size: 13px; font-weight: 600; color: #7dd3fc; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    .field-label {
+      font-size: 11px; color: #64748b;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      display: block; margin-bottom: 5px;
+    }
+    input[type="text"] {
+      width: 100%; background: #1e2533; border: 1px solid #2d3748;
+      border-radius: 6px; color: #e2e8f0; font-size: 13px;
+      padding: 9px 11px; outline: none;
+      font-family: 'Courier New', monospace; transition: border-color 0.15s;
+    }
+    input[type="text"]:focus { border-color: #7dd3fc; }
+    input[type="text"]::placeholder { color: #374151; }
+
+    .tabs { display: flex; margin-top: 12px; border-bottom: 1px solid #1e2533; }
+    .tab {
+      flex: 1; padding: 7px 4px; font-size: 11px; text-align: center;
+      color: #4a5568; cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.15s; user-select: none; letter-spacing: 0.03em;
+    }
+    .tab.active { color: #7dd3fc; border-bottom-color: #7dd3fc; }
+    .tab:hover:not(.active) { color: #94a3b8; }
+
+    .panel { display: none; margin-top: 12px; }
+    .panel.active { display: block; }
+
+    .wl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .wl-title { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+    .badge { background: #1a3a4f; color: #7dd3fc; font-size: 10px; padding: 2px 8px; border-radius: 10px; border: 1px solid #2d5a7a; }
+
+    .path-list {
+      background: #0a0d14; border: 1px solid #1e2533; border-radius: 6px;
+      max-height: 180px; overflow-y: auto; padding: 4px 0;
+    }
+    .path-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 3px 10px; cursor: pointer; transition: background 0.1s;
+    }
+    .path-item:hover { background: #1a1f2e; }
+    .path-item input[type="checkbox"] { accent-color: #7dd3fc; cursor: pointer; flex-shrink: 0; }
+    .path-item span { font-family: 'Courier New', monospace; font-size: 11px; color: #a3e635; }
+    .path-item span.unchecked { color: #374151; }
+
+    .wl-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .wl-action {
+      font-size: 11px; color: #4a5568; cursor: pointer;
+      text-decoration: underline; transition: color 0.1s;
+      background: none; border: none; padding: 0; font-family: inherit;
+    }
+    .wl-action:hover { color: #94a3b8; }
+
+    textarea {
+      width: 100%; background: #0a0d14; border: 1px solid #1e2533; border-radius: 6px;
+      color: #a3e635; font-family: 'Courier New', monospace;
+      font-size: 11px; padding: 8px; resize: vertical; min-height: 140px; outline: none;
+    }
+    textarea:focus { border-color: #7dd3fc; }
+    .hint { font-size: 11px; color: #374151; margin-top: 5px; }
+
+    .options { display: flex; align-items: center; gap: 14px; margin-top: 12px; flex-wrap: wrap; }
+    .opt-label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #64748b; cursor: pointer; }
+    .opt-label input[type="checkbox"] { accent-color: #7dd3fc; cursor: pointer; }
+    input[type="number"] {
+      width: 52px; background: #1e2533; border: 1px solid #2d3748;
+      border-radius: 4px; color: #e2e8f0; font-size: 12px;
+      padding: 3px 6px; outline: none; text-align: center;
+    }
+
+    #go-btn {
+      margin-top: 14px; width: 100%; padding: 11px;
+      background: linear-gradient(135deg, #0ea5e9, #7c3aed);
+      border: none; border-radius: 7px; color: #fff;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      letter-spacing: 0.03em; transition: opacity 0.15s; font-family: inherit;
+    }
+    #go-btn:hover:not(:disabled) { opacity: 0.88; }
+    #go-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #status { margin-top: 10px; font-size: 12px; padding: 8px 10px; border-radius: 6px; display: none; }
+    #status.ok   { background: #0d2d1a; color: #4ade80; border: 1px solid #166534; display: block; }
+    #status.err  { background: #2d0d0d; color: #f87171; border: 1px solid #7f1d1d; display: block; }
+    #status.info { background: #0d1e2d; color: #7dd3fc; border: 1px solid #1e4060; display: block; }
+
+    #preview { margin-top: 10px; display: none; }
+    #preview-title { font-size: 11px; color: #4a5568; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    #preview-scroll {
+      background: #0a0d14; border: 1px solid #1e2533; border-radius: 6px;
+      max-height: 120px; overflow-y: auto; padding: 5px 8px;
+    }
+    #preview-scroll div {
+      font-family: 'Courier New', monospace; font-size: 11px; color: #a3e635;
+      padding: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      border-bottom: 1px solid #0f1117;
+    }
+    #preview-scroll div:last-child { border-bottom: none; }
+    #preview-scroll div.more { color: #4a5568; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="dot"></div>
+    <h1>Pentest URL Opener</h1>
+  </div>
+
+  <span class="field-label">Target URL</span>
+  <input type="text" id="base-url" placeholder="https://example.com" />
+
+  <div class="tabs">
+    <div class="tab active" id="tab-wordlist">Your dirs.txt</div>
+    <div class="tab" id="tab-custom">Custom paths</div>
+  </div>
+
+  <div class="panel active" id="panel-wordlist">
+    <div class="wl-header">
+      <span class="wl-title">Paths from your dirs.txt</span>
+      <span class="badge" id="sel-count">106 selected</span>
+    </div>
+    <div class="path-list" id="path-list"></div>
+    <div class="wl-actions">
+      <button class="wl-action" id="btn-all">Select all</button>
+      <button class="wl-action" id="btn-none">Deselect all</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-custom">
+    <textarea id="custom-paths" placeholder="Paste paths, one per line:&#10;/admin&#10;/.env&#10;/api/v1/users&#10;&#10;(domain will be prepended automatically)"></textarea>
+    <div class="hint">Works like url_builder.py — domain + each path</div>
+  </div>
+
+  <div class="options">
+    <label class="opt-label">
+      <input type="checkbox" id="new-window"> New window
+    </label>
+    <label class="opt-label">
+      Delay: <input type="number" id="delay" value="0" min="0" max="5000" step="100"> ms
+    </label>
+    <label class="opt-label">
+      Max: <input type="number" id="max-tabs" value="106" min="1" max="500">
+    </label>
+  </div>
+
+  <button id="go-btn">&#9654; Generate &amp; Open All URLs</button>
+
+  <div id="status"></div>
+
+  <div id="preview">
+    <div id="preview-title">URLs to open</div>
+    <div id="preview-scroll"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
